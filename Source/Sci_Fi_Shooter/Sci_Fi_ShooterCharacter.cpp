@@ -14,6 +14,9 @@ void ASci_Fi_ShooterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	OnTakeAnyDamage.AddDynamic(this, &ASci_Fi_ShooterCharacter::OnDamageTaken);
+	Health = MaxHealth;
+	
 	GetMesh()->HideBoneByName(TEXT("weapon_r"), EPhysBodyOp::PBO_None);
 	
 	Weapon = GetWorld()->SpawnActor<AWeaponBase>(WeaponClass);
@@ -117,5 +120,24 @@ void ASci_Fi_ShooterCharacter::shoot()
 	if (Weapon)
 	{
 		Weapon->PullTrigger();
+	}
+}
+
+void ASci_Fi_ShooterCharacter::OnDamageTaken(AActor* DamagedActor, float Damage, const class UDamageType* DamageType,
+	class AController* InstigatedBy, AActor* DamageCauser)
+{
+	if (Damage <= 0.0f || !bIsAlive)
+	{
+		return;
+	}
+
+	Health -= Damage;
+
+	if (Health <= 0.0f)
+	{
+		bIsAlive = false;
+		Health = 0.0f;
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		UE_LOG(LogTemp, Display, TEXT("Character is dead"));
 	}
 }

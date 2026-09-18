@@ -40,6 +40,9 @@ public:
 	
 	UPROPERTY(EditAnywhere)
 	AController* OwnerController;
+	
+	UPROPERTY(EditAnywhere)
+	float BulletDamage = 20.0f;
 
 	UPROPERTY(EditAnywhere, Category = "Weapon")
 	float Damage = 20.0f;

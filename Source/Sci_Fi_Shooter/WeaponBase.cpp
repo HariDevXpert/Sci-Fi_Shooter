@@ -16,15 +16,15 @@ AWeaponBase::AWeaponBase()
 	GunMesh = CreateDefaultSubobject<USkeletalMeshComponent>("Gun Mesh");
 	GunMesh->SetupAttachment(SceneRoot);
 	
-	//MuzzleFlashParticleSystem = CreateDefaultSubobject<UNiagaraComponent>("Muzzle Flash");
-	//MuzzleFlashParticleSystem->SetupAttachment(GunMesh);
+	MuzzleFlashParticleSystem = CreateDefaultSubobject<UNiagaraComponent>("Muzzle Flash");
+	MuzzleFlashParticleSystem->SetupAttachment(GunMesh);
 }
 
 void AWeaponBase::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	//MuzzleFlashParticleSystem->Deactivate();
+	MuzzleFlashParticleSystem->Deactivate();
 	
 }
 
@@ -36,6 +36,7 @@ void AWeaponBase::Tick(float DeltaTime)
 
 void AWeaponBase::PullTrigger()
 {
+	MuzzleFlashParticleSystem->Activate(true);
 	if (OwnerController)
 	{
 		FVector ViewpointLocation;
@@ -50,7 +51,14 @@ void AWeaponBase::PullTrigger()
 		bool IsHit = GetWorld()->LineTraceSingleByChannel(HitResult , ViewpointLocation, EndLocation, ECollisionChannel::ECC_GameTraceChannel1, Params);
 		if (IsHit)
 		{
-			DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 5.0f, 16, FColor::Red, true, 2.0f);
+			UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ImpactParticleSystem, HitResult.ImpactPoint, HitResult.ImpactPoint.Rotation());
+			
+			AActor* HitActor = HitResult.GetActor();
+			if (HitActor)
+			{
+				UGameplayStatics::ApplyDamage(HitActor, BulletDamage, OwnerController, this, UDamageType::StaticClass());
+				
+			}
 		}
 	}
 }

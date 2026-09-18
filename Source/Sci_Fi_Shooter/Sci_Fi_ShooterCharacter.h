@@ -72,6 +72,18 @@ public:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AWeaponBase> WeaponClass;
 	
+	UPROPERTY(EditAnywhere)
+	float MaxHealth = 100.0f;
+	
+	UPROPERTY(EditAnywhere)
+	float Health;
+	
+	UPROPERTY(EditAnywhere)
+	bool bIsAlive = true;
+	
+	UFUNCTION()
+	void OnDamageTaken( AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
+	
 	AWeaponBase* Weapon;
 	
 };
