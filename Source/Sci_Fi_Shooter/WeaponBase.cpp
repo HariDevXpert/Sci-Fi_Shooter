@@ -34,3 +34,24 @@ void AWeaponBase::Tick(float DeltaTime)
 
 }
 
+void AWeaponBase::PullTrigger()
+{
+	if (OwnerController)
+	{
+		FVector ViewpointLocation;
+		FRotator ViewPointRotation;
+		OwnerController->GetPlayerViewPoint(ViewpointLocation,ViewPointRotation);
+		
+		FVector EndLocation = ViewpointLocation + ViewPointRotation.Vector() * MaxRange;
+		FHitResult HitResult;
+		FCollisionQueryParams Params;
+		Params.AddIgnoredActor(this);
+		Params.AddIgnoredActor(GetOwner());
+		bool IsHit = GetWorld()->LineTraceSingleByChannel(HitResult , ViewpointLocation, EndLocation, ECollisionChannel::ECC_GameTraceChannel1, Params);
+		if (IsHit)
+		{
+			DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 5.0f, 16, FColor::Red, true, 2.0f);
+		}
+	}
+}
+

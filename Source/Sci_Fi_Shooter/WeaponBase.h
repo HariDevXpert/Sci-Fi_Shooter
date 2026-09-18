@@ -43,7 +43,7 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Weapon")
 	float Damage = 20.0f;
-
 	
-	
+	UFUNCTION()
+	void PullTrigger();
 };

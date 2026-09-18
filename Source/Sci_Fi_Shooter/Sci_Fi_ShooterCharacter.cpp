@@ -10,6 +10,21 @@
 #include "InputActionValue.h"
 #include "Sci_Fi_Shooter.h"
 
+void ASci_Fi_ShooterCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+	
+	GetMesh()->HideBoneByName(TEXT("weapon_r"), EPhysBodyOp::PBO_None);
+	
+	Weapon = GetWorld()->SpawnActor<AWeaponBase>(WeaponClass);
+	if (Weapon)
+	{
+		Weapon->SetOwner(this);
+		Weapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("WeaponSocket"));
+		Weapon->OwnerController = GetController();
+	}
+}
+
 ASci_Fi_ShooterCharacter::ASci_Fi_ShooterCharacter()
 {
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
@@ -41,6 +56,9 @@ void ASci_Fi_ShooterCharacter::SetupPlayerInputComponent(UInputComponent* Player
 		EnhancedInputComponent->BindAction(MouseLookAction, ETriggerEvent::Triggered, this, &ASci_Fi_ShooterCharacter::Look);
 
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ASci_Fi_ShooterCharacter::Look);
+		
+		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Started, this, &ASci_Fi_ShooterCharacter::shoot);
+
 	}
 }
 
@@ -92,4 +110,12 @@ void ASci_Fi_ShooterCharacter::DoJumpEnd()
 {
 
 	StopJumping();
+}
+
+void ASci_Fi_ShooterCharacter::shoot()
+{
+	if (Weapon)
+	{
+		Weapon->PullTrigger();
+	}
 }

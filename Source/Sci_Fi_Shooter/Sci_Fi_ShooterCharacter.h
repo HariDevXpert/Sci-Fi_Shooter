@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
+
+#include "WeaponBase.h"
 #include "Sci_Fi_ShooterCharacter.generated.h"
 
 class USpringArmComponent;
@@ -20,6 +22,7 @@ class ASci_Fi_ShooterCharacter : public ACharacter
 	GENERATED_BODY()
 	
 protected:
+	virtual void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere, Category="Input")
 	UInputAction* JumpAction;
@@ -32,6 +35,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category="Input")
 	UInputAction* MouseLookAction;
+	
+	UPROPERTY(EditAnywhere, Category="Input")
+    UInputAction* ShootAction;
 
 public:
 
@@ -60,4 +66,12 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Input")
 	virtual void DoJumpEnd();
+	
+	void shoot();
+	
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AWeaponBase> WeaponClass;
+	
+	AWeaponBase* Weapon;
+	
 };
