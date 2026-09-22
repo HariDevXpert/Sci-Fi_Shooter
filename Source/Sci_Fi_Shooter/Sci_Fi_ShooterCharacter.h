@@ -11,6 +11,7 @@
 
 class USpringArmComponent;
 class UCameraComponent;
+class UUserWidget;
 class UInputAction;
 struct FInputActionValue;
 
@@ -72,14 +73,14 @@ public:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AWeaponBase> WeaponClass;
 	
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Health")
 	float MaxHealth = 100.0f;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Health")
+	float Health ;
 	
-	UPROPERTY(EditAnywhere)
-	float Health;
-	
-	UPROPERTY(EditAnywhere)
-	bool bIsAlive = true;
+	UPROPERTY(BlueprintReadOnly)
+	bool IsAlive = true;
 	
 	UFUNCTION()
 	void OnDamageTaken( AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);

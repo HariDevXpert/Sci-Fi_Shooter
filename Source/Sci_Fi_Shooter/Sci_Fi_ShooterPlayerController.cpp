@@ -3,6 +3,7 @@
 
 #include "Sci_Fi_ShooterPlayerController.h"
 #include "EnhancedInputSubsystems.h"
+#include "HUD_Widget.h"
 #include "Engine/LocalPlayer.h"
 #include "InputMappingContext.h"
 #include "Blueprint/UserWidget.h"
@@ -30,6 +31,12 @@ void ASci_Fi_ShooterPlayerController::BeginPlay()
 
 		}
 
+	}
+	
+	HUDWidget = CreateWidget<UHUD_Widget>(this, HUDWidgetClass);
+	if (HUDWidget)
+	{
+		HUDWidget->AddToViewport();
 	}
 }
 
@@ -62,6 +69,5 @@ void ASci_Fi_ShooterPlayerController::SetupInputComponent()
 
 bool ASci_Fi_ShooterPlayerController::ShouldUseTouchControls() const
 {
-	// are we on a mobile platform? Should we force touch?
 	return SVirtualJoystick::ShouldDisplayTouchInterface() || bForceTouchControls;
 }

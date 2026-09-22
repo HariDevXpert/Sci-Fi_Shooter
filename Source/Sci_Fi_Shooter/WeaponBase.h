@@ -47,6 +47,12 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Weapon")
 	float Damage = 20.0f;
 	
+	UPROPERTY(EditAnywhere)
+	USoundBase* ShootSound;
+	
+	UPROPERTY(EditAnywhere)
+	USoundBase* ImpactSound;
+	
 	UFUNCTION()
 	void PullTrigger();
 };

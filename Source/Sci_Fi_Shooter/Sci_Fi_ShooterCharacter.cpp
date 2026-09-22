@@ -3,6 +3,7 @@
 #include "Sci_Fi_ShooterCharacter.h"
 #include "Engine/LocalPlayer.h"
 #include "Components/CapsuleComponent.h"
+#include "Blueprint/UserWidget.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "EnhancedInputComponent.h"
@@ -13,7 +14,6 @@
 void ASci_Fi_ShooterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
 	OnTakeAnyDamage.AddDynamic(this, &ASci_Fi_ShooterCharacter::OnDamageTaken);
 	Health = MaxHealth;
 	
@@ -126,7 +126,7 @@ void ASci_Fi_ShooterCharacter::shoot()
 void ASci_Fi_ShooterCharacter::OnDamageTaken(AActor* DamagedActor, float Damage, const class UDamageType* DamageType,
 	class AController* InstigatedBy, AActor* DamageCauser)
 {
-	if (Damage <= 0.0f || !bIsAlive)
+	if (Damage <= 0.0f || !IsAlive)
 	{
 		return;
 	}
@@ -135,9 +135,11 @@ void ASci_Fi_ShooterCharacter::OnDamageTaken(AActor* DamagedActor, float Damage,
 
 	if (Health <= 0.0f)
 	{
-		bIsAlive = false;
+		IsAlive = false;
 		Health = 0.0f;
 		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		DetachFromControllerPendingDestroy();
+		
 		UE_LOG(LogTemp, Display, TEXT("Character is dead"));
 	}
 }

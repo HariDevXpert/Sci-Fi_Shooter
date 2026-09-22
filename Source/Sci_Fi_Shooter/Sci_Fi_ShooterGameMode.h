@@ -18,6 +18,9 @@ public:
 	
 	/** Constructor */
 	ASci_Fi_ShooterGameMode();
+	
+protected:
+	virtual void BeginPlay() override;
 };
 
 

@@ -3,6 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Engine/Blueprint.h"
+#include "HUD_Widget.h"
 #include "GameFramework/PlayerController.h"
 #include "Sci_Fi_ShooterPlayerController.generated.h"
 
@@ -48,5 +50,11 @@ protected:
 
 	/** Returns true if the player should use UMG touch controls */
 	bool ShouldUseTouchControls() const;
+	
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UHUD_Widget> HUDWidgetClass;
+	
+	UPROPERTY()
+	UHUD_Widget* HUDWidget;
 
 };
