@@ -3,6 +3,7 @@
 #include "Sci_Fi_ShooterCharacter.h"
 #include "Engine/LocalPlayer.h"
 #include "Components/CapsuleComponent.h"
+#include "GameFramework/PlayerController.h"
 #include "Blueprint/UserWidget.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
@@ -14,18 +15,53 @@
 void ASci_Fi_ShooterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	OnTakeAnyDamage.AddDynamic(this, &ASci_Fi_ShooterCharacter::OnDamageTaken);
+
+	OnTakeAnyDamage.AddDynamic(
+		this,
+		&ASci_Fi_ShooterCharacter::OnDamageTaken
+	);
+
 	Health = MaxHealth;
-	
-	GetMesh()->HideBoneByName(TEXT("weapon_r"), EPhysBodyOp::PBO_None);
-	
-	Weapon = GetWorld()->SpawnActor<AWeaponBase>(WeaponClass);
-	if (Weapon)
+
+	GetMesh()->HideBoneByName(
+		TEXT("weapon_r"),
+		EPhysBodyOp::PBO_None
+	);
+
+	// ---------------- RIFLE ----------------
+
+	Rifle = GetWorld()->SpawnActor<AWeaponBase>(RifleClass);
+
+	if (Rifle)
 	{
-		Weapon->SetOwner(this);
-		Weapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("WeaponSocket"));
-		Weapon->OwnerController = GetController();
+		Rifle->SetOwner(this);
+		Rifle->OwnerController = GetController();
+
+		Rifle->AttachToComponent(
+			GetMesh(),
+			FAttachmentTransformRules::SnapToTargetNotIncludingScale,
+			TEXT("WeaponSocket")
+		);
 	}
+
+	// ---------------- LAUNCHER ----------------
+
+	Launcher = GetWorld()->SpawnActor<AWeaponBase>(LauncherClass);
+	if (Launcher)
+	{
+		Launcher->SetOwner(this);
+		Launcher->OwnerController = GetController();
+
+		Launcher->AttachToComponent(
+			GetMesh(),
+			FAttachmentTransformRules::SnapToTargetNotIncludingScale,
+			TEXT("WeaponSocket")
+		);
+
+		Launcher->SetActorHiddenInGame(true);
+	}
+
+	CurrentWeapon = Rifle;
 }
 
 ASci_Fi_ShooterCharacter::ASci_Fi_ShooterCharacter()
@@ -61,6 +97,8 @@ void ASci_Fi_ShooterCharacter::SetupPlayerInputComponent(UInputComponent* Player
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ASci_Fi_ShooterCharacter::Look);
 		
 		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Started, this, &ASci_Fi_ShooterCharacter::shoot);
+		
+		EnhancedInputComponent->BindAction(SwitchWeaponAction,ETriggerEvent::Started,this,&ASci_Fi_ShooterCharacter::SwitchWeapon);
 
 	}
 }
@@ -117,14 +155,28 @@ void ASci_Fi_ShooterCharacter::DoJumpEnd()
 
 void ASci_Fi_ShooterCharacter::shoot()
 {
-	if (Weapon)
+	if (CurrentWeapon)
 	{
-		Weapon->PullTrigger();
+		CurrentWeapon->PullTrigger();
 	}
 }
 
+void ASci_Fi_ShooterCharacter::Heal(float Amount)
+{
+	if (!IsAlive || Amount <= 0.0f)
+	{
+		return;
+	}
+
+	Health = FMath::Clamp(
+		Health + Amount,
+		0.0f,
+		MaxHealth
+	);
+}
+
 void ASci_Fi_ShooterCharacter::OnDamageTaken(AActor* DamagedActor, float Damage, const class UDamageType* DamageType,
-	class AController* InstigatedBy, AActor* DamageCauser)
+											 class AController* InstigatedBy, AActor* DamageCauser)
 {
 	if (Damage <= 0.0f || !IsAlive)
 	{
@@ -138,8 +190,48 @@ void ASci_Fi_ShooterCharacter::OnDamageTaken(AActor* DamagedActor, float Damage,
 		IsAlive = false;
 		Health = 0.0f;
 		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+		APlayerController* PC = Cast<APlayerController>(GetController());
+
+		if (PC && LoseWidgetClass)
+		{
+			UUserWidget* LoseWidget = CreateWidget<UUserWidget>(PC, LoseWidgetClass);
+			if (LoseWidget)
+			{
+				LoseWidget->AddToViewport();
+
+				PC->SetShowMouseCursor(true);
+				FInputModeUIOnly InputMode;
+				InputMode.SetWidgetToFocus(LoseWidget->TakeWidget());
+				PC->SetInputMode(InputMode);
+			}
+		}
+
 		DetachFromControllerPendingDestroy();
-		
+
 		UE_LOG(LogTemp, Display, TEXT("Character is dead"));
+	}
+}
+
+void ASci_Fi_ShooterCharacter::SwitchWeapon()
+{
+	if (!Rifle || !Launcher)
+	{
+		return;
+	}
+
+	if (CurrentWeapon == Rifle)
+	{
+		Rifle->SetActorHiddenInGame(true);
+		Launcher->SetActorHiddenInGame(false);
+
+		CurrentWeapon = Launcher;
+	}
+	else
+	{
+		Launcher->SetActorHiddenInGame(true);
+		Rifle->SetActorHiddenInGame(false);
+
+		CurrentWeapon = Rifle;
 	}
 }

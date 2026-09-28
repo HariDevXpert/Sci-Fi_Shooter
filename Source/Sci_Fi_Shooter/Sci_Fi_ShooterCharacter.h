@@ -68,10 +68,31 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Input")
 	virtual void DoJumpEnd();
 	
-	void shoot();
+	UPROPERTY(EditAnywhere, Category="Input")
+	UInputAction* SwitchWeaponAction;
 	
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<AWeaponBase> WeaponClass;
+	//Weapon
+	
+	void shoot();
+	UPROPERTY(EditAnywhere, Category="Weapons")
+	TSubclassOf<AWeaponBase> RifleClass;
+
+	UPROPERTY(EditAnywhere, Category="Weapons")
+	TSubclassOf<AWeaponBase> LauncherClass;
+
+	UPROPERTY()
+	AWeaponBase* Rifle;
+
+	UPROPERTY()
+	AWeaponBase* Launcher;
+
+	UPROPERTY()
+	AWeaponBase* CurrentWeapon;
+
+	UFUNCTION()
+	void SwitchWeapon();
+	
+	//Health
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Health")
 	float MaxHealth = 100.0f;
@@ -80,11 +101,17 @@ public:
 	float Health ;
 	
 	UPROPERTY(BlueprintReadOnly)
-	bool IsAlive = true;
+	bool IsAlive = true;	
+	
+	UFUNCTION(BlueprintCallable, Category="Health")
+	void Heal(float Amount);
 	
 	UFUNCTION()
 	void OnDamageTaken( AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
 	
-	AWeaponBase* Weapon;
+	//UI
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="UI")
+	TSubclassOf<UUserWidget> LoseWidgetClass;
 	
 };
