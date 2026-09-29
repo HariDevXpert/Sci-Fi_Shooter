@@ -109,9 +109,32 @@ public:
 	UFUNCTION()
 	void OnDamageTaken( AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
 	
+	//Diamonds
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Diamonds")
+	int32 TotalDiamonds = 4;
+
+	UPROPERTY(BlueprintReadOnly, Category="Diamonds")
+	int32 DiamondsCollected = 0;
+
+	UFUNCTION(BlueprintCallable, Category="Diamonds")
+	void CollectDiamond();
+	
+	//Kills
+	UPROPERTY(BlueprintReadOnly, Category="Kills")
+	int32 Kills = 0;
+
+	UFUNCTION(BlueprintCallable, Category="Kills")
+	void AddKill();
+	
 	//UI
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="UI")
 	TSubclassOf<UUserWidget> LoseWidgetClass;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="UI")
+	TSubclassOf<UUserWidget> WinWidgetClass;
+
+	void ShowEndScreen(TSubclassOf<UUserWidget> WidgetClass);
 	
 };

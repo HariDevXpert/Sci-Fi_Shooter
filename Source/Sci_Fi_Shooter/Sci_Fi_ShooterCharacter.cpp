@@ -174,7 +174,7 @@ void ASci_Fi_ShooterCharacter::Heal(float Amount)
 		MaxHealth
 	);
 }
-
+/*
 void ASci_Fi_ShooterCharacter::OnDamageTaken(AActor* DamagedActor, float Damage, const class UDamageType* DamageType,
 											 class AController* InstigatedBy, AActor* DamageCauser)
 {
@@ -212,6 +212,48 @@ void ASci_Fi_ShooterCharacter::OnDamageTaken(AActor* DamagedActor, float Damage,
 		UE_LOG(LogTemp, Display, TEXT("Character is dead"));
 	}
 }
+*/
+void ASci_Fi_ShooterCharacter::OnDamageTaken(AActor* DamagedActor, float Damage, const class UDamageType* DamageType,
+											 class AController* InstigatedBy, AActor* DamageCauser)
+{
+	if (Damage <= 0.0f || !IsAlive)
+	{
+		return;
+	}
+
+	Health -= Damage;
+
+	if (Health <= 0.0f)
+	{
+		IsAlive = false;
+		Health = 0.0f;
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+		const bool bIsPlayer = GetController() && GetController()->IsA<APlayerController>();
+
+		if (bIsPlayer)
+		{
+			// The player died
+			ShowEndScreen(LoseWidgetClass);
+		}
+		else
+		{
+			// An enemy died — was the SHOOTER the player?
+			if (InstigatedBy && InstigatedBy->IsA<APlayerController>())
+			{
+				if (ASci_Fi_ShooterCharacter* PlayerChar =
+					Cast<ASci_Fi_ShooterCharacter>(InstigatedBy->GetPawn()))
+				{
+					PlayerChar->AddKill();
+				}
+			}
+		}
+
+		DetachFromControllerPendingDestroy();
+
+		UE_LOG(LogTemp, Display, TEXT("Character is dead"));
+	}
+}
 
 void ASci_Fi_ShooterCharacter::SwitchWeapon()
 {
@@ -234,4 +276,44 @@ void ASci_Fi_ShooterCharacter::SwitchWeapon()
 
 		CurrentWeapon = Rifle;
 	}
+}
+
+void ASci_Fi_ShooterCharacter::CollectDiamond()
+{
+	if (!IsAlive)
+	{
+		return;
+	}
+
+	DiamondsCollected++;
+
+	if (DiamondsCollected >= TotalDiamonds)
+	{
+		ShowEndScreen(WinWidgetClass);
+	}
+}
+
+void ASci_Fi_ShooterCharacter::ShowEndScreen(TSubclassOf<UUserWidget> WidgetClass)
+{
+	APlayerController* PC = Cast<APlayerController>(GetController());
+	if (!PC || !WidgetClass)
+	{
+		return;
+	}
+
+	UUserWidget* Widget = CreateWidget<UUserWidget>(PC, WidgetClass);
+	if (Widget)
+	{
+		Widget->AddToViewport();
+		PC->SetShowMouseCursor(true);
+
+		FInputModeUIOnly InputMode;
+		InputMode.SetWidgetToFocus(Widget->TakeWidget());
+		PC->SetInputMode(InputMode);
+	}
+}
+
+void ASci_Fi_ShooterCharacter::AddKill()
+{
+	Kills++;
 }

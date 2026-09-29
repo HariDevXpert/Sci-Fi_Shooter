@@ -4,6 +4,7 @@
 #include "GameFramework/Actor.h"
 #include "Collectable.generated.h"
 
+class ASci_Fi_ShooterCharacter;
 class USphereComponent;
 class UStaticMeshComponent;
 
@@ -33,4 +34,16 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Collectable")
     bool DestroyAfterCollect = true;
+    
+    UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="Collectable")
+            void OnCollected(ASci_Fi_ShooterCharacter* Collector);
+            virtual void OnCollected_Implementation(ASci_Fi_ShooterCharacter* Collector);
+    
+    protected:
+        UFUNCTION()
+        void OnOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+                       UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
+                       bool bFromSweep, const FHitResult& SweepResult);
+    
+        
 };
